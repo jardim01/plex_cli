@@ -13,6 +13,12 @@ SECONDARY_COLOR = 49  # Aqua
 ERROR_COLOR = Color.RED
 WARNING_COLOR = Color.YELLOW
 SUCCESS_COLOR = Color.GREEN
+PROMPT_COLOR = Color.CYAN
+INPUT_COLOR = Color.GREY
+INPUT_STYLE = Style.ITALICIZED
+
+PROMPT_SYMBOL = ">"
+SEPARATOR_SYMBOL = "\\"
 
 GO_BACK = "\\.\\."
 
@@ -43,4 +49,3 @@ def after_subtitle_download(*subtitle_paths: str):
     for p in subtitle_paths:
         convert_to_utf8(p)
     open_subtitle_cleaner(subtitle_paths)
-    pass

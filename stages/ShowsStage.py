@@ -2,20 +2,17 @@ import re
 
 from re import Match
 
-from plexapi.library import ShowSection
-from plexapi.server import PlexServer
 from plexapi.video import Show, Episode
 
-from jardim_utils.stylish import stylish_p
+from jardim_utils.stylish import stylish_p, Style
 
-from AppState import AppState
-from Command import Command
-from config import ERROR_COLOR, SUBTITLE_LOOKBACK, REQUIRED_SUBTITLE_LANGS
-from exceptions import SectionNotFoundException
-from stages.ShowStage import ShowStage
 from stages.Stage import Stage
-from subtitles import get_missing_subtitle_langs_2, download_missing_subtitles, display_missing_subtitles_2
-from utils import get_at_index_or_none, list_items
+from stages.ShowStage import ShowStage
+from Command import Command
+from AppState import AppState
+from config import ERROR_COLOR, SUBTITLE_LOOKBACK, REQUIRED_SUBTITLE_LANGS, SECONDARY_COLOR
+from subtitles import get_missing_subtitle_langs_2, display_missing_subtitles_2, download_missing_subtitles
+from utils import get_at_index_or_none, list_items, confirm
 
 showStage = ShowStage()
 
@@ -25,48 +22,32 @@ class ShowsStage(Stage):
         super().__init__()
         self.commands = [
             Command(re.compile(r"list|all|shows"),
-                    "Displays the list of TV Shows",
+                    "Displays the list of tv shows",
                     _list_shows),
             Command(re.compile(r"\? (.+)"),
-                    "Displays the list of TV Shows that match the given input",
+                    "Displays the list of tv shows that match the given input",
                     _list_shows),
             Command(re.compile(r"(\d+)"),
-                    "Navigates to a specific show",
+                    "Navigates to a specific tv show",
                     _enter_show_stage_by_idx),
             Command(re.compile(r"ms( -a)?( -d)?"),
                     "Displays/downloads missing subtitles",
-                    _missing_subtitles)
+                    _missing_subtitles),
+            Command(re.compile(r"scan|update"),
+                    "Scans the tv shows section for new media",
+                    _scan_library_files)
         ]
 
 
-def _get_shows_section(server: PlexServer) -> ShowSection:
-    for s in server.library.sections():
-        if isinstance(s, ShowSection):
-            return s
-    raise SectionNotFoundException()
-
-
-def _get_shows(server: PlexServer) -> list[Show]:
-    return _get_shows_section(server).all()
-
-
 def _list_shows(match: Match, state: AppState):
-    try:
-        shows: list[Show] = _get_shows(state.server)
-    except SectionNotFoundException:
-        stylish_p("Failed to find TV Show section", foreground=ERROR_COLOR)
-        return
+    shows = state.shows_section.all()
 
     query = get_at_index_or_none(match.groups(), 0)
     list_items([show.title for show in shows], query)
 
 
 def _enter_show_stage_by_idx(match: Match, state: AppState):
-    try:
-        shows = _get_shows(state.server)
-    except SectionNotFoundException:
-        stylish_p("Failed to find TV Show section", foreground=ERROR_COLOR)
-        return
+    shows = state.shows_section.all()
 
     idx = int(match.groups()[0]) - 1
     if idx in range(len(shows)):
@@ -84,21 +65,20 @@ def _missing_subtitles(match: Match, state: AppState):
     all_episodes = match.groups()[0] is not None
     download = match.groups()[1] is not None
 
-    try:
-        section = _get_shows_section(state.server)
-    except SectionNotFoundException:
-        stylish_p("Failed to find TV Show section", foreground=ERROR_COLOR)
-        return
-
     filters = {}
     if not all_episodes:
         filters["originallyAvailableAt>>"] = SUBTITLE_LOOKBACK
 
-    episodes: list[Episode] = section.searchEpisodes(filters=filters)
+    episodes: list[Episode] = state.shows_section.searchEpisodes(filters=filters)
     missing = get_missing_subtitle_langs_2(episodes, REQUIRED_SUBTITLE_LANGS.keys())
 
     if download:
         download_missing_subtitles(missing)
-        pass
     else:
         display_missing_subtitles_2(missing)
+
+
+def _scan_library_files(_: Match, state: AppState):
+    if confirm("You are about to scan the tv shows section"):
+        stylish_p("Scaning tv shows section...", foreground=SECONDARY_COLOR, style=Style.LIGHT)
+        state.shows_section.update()
