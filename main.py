@@ -4,7 +4,7 @@ from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
 from plexapi.exceptions import BadRequest
 
-from jardim_utils.stylish import stylish_p
+from jardim.stylish import stylish_p
 
 from stages.MainStage import MainStage
 from AppState import AppState

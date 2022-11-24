@@ -2,7 +2,7 @@ import re
 
 from re import Match
 
-from jardim_utils.stylish import stylish, Style, stylish_p
+from jardim.stylish import stylish, Style, stylish_p
 
 from stages.Stage import Stage
 from Command import Command

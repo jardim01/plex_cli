@@ -2,10 +2,10 @@ import humanize
 
 from plexapi.video import Episode, Movie
 
-from jardim_utils import opensubtitles
-from jardim_utils.opensubtitles import OSLanguage, download_extract
-from jardim_utils.stylish import stylish, Style, stylish_p, Color
-from jardim_utils.utils import table, TableChars
+from jardim import opensubtitles
+from jardim.opensubtitles import OSLanguage, download_extract
+from jardim.stylish import stylish, Style, stylish_p, Color
+from jardim.table import table, TableChars
 
 from config import SECONDARY_COLOR, SUBTITLE_LANGS_FALLBACK, ERROR_COLOR, table_chars_transformation, \
     get_subtitle_download_path, SUCCESS_COLOR, WARNING_COLOR, after_subtitle_download, REQUIRED_SUBTITLE_LANGS

@@ -5,7 +5,7 @@ from re import Match
 from plexapi.library import ShowSection, MovieSection
 from plexapi.server import PlexServer
 
-from jardim_utils.stylish import stylish_p
+from jardim.stylish import stylish_p
 
 from stages.Stage import Stage
 from stages.ShowsStage import ShowsStage

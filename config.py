@@ -1,7 +1,7 @@
 import os
 
-from jardim_utils.opensubtitles import OSLanguage
-from jardim_utils.stylish import Color, stylish, Style
+from jardim.opensubtitles import OSLanguage
+from jardim.stylish import Color, stylish, Style
 
 from plugins import convert_to_utf8, open_subtitle_cleaner
 

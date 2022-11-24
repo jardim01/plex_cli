@@ -4,7 +4,7 @@ from re import Match
 
 from plexapi.video import Show, Episode
 
-from jardim_utils.stylish import stylish_p, Style
+from jardim.stylish import stylish_p, Style
 
 from stages.Stage import Stage
 from stages.ShowStage import ShowStage

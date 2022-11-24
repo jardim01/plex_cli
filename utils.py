@@ -4,7 +4,7 @@ from typing import Any, Callable
 from plexapi.library import Guid
 from plexapi.video import Show, Movie
 
-from jardim_utils.stylish import stylish, Style
+from jardim.stylish import stylish, Style
 
 from config import PRIMARY_COLOR, SECONDARY_COLOR, PROMPT_COLOR, PROMPT_SYMBOL, SEPARATOR_SYMBOL, INPUT_COLOR, \
     INPUT_STYLE
