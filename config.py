@@ -1,6 +1,6 @@
 import os
 
-from jardim.opensubtitles import OSLanguage
+from jardim.subtitles.OSLanguage import OSLanguage
 from jardim.stylish import Color, stylish, Style
 
 from plugins import convert_to_utf8, open_subtitle_cleaner
@@ -22,7 +22,8 @@ SEPARATOR_SYMBOL = "\\"
 
 GO_BACK = "\\.\\."
 
-SUBTITLE_LOOKBACK = "60d"
+EPISODE_SUBTITLE_LOOKBACK = "60d"
+MOVIE_SUBTITLE_LOOKBACK = "180d"
 REQUIRED_SUBTITLE_LANGS = {
     "eng": OSLanguage.ENGLISH,
     "por": OSLanguage.PORTUGUESE

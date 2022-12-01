@@ -2,8 +2,9 @@ import humanize
 
 from plexapi.video import Episode, Movie
 
-from jardim import opensubtitles
-from jardim.opensubtitles import OSLanguage, download_extract
+from jardim.subtitles import opensubtitles
+from jardim.subtitles.OSLanguage import OSLanguage
+from jardim.subtitles.Subtitle import Subtitle
 from jardim.stylish import stylish, Style, stylish_p, Color
 from jardim.table import table, TableChars
 
@@ -118,7 +119,7 @@ def display_missing_subtitles_2(missing: dict[Episode | Movie, list[str]]):
         display_missing_subtitles(video, langs)
 
 
-def select_subtitle(subtitles: list):
+def select_subtitle(subtitles: list[Subtitle]) -> Subtitle | None:
     headers = ["#", "File Name", "Format", "Episode", "HI", "AI", "Language", "Rating", "Downloads"]
     yes = stylish("✓", foreground=Color.GREEN)
     no = stylish("✗", foreground=Color.RED)
@@ -127,14 +128,14 @@ def select_subtitle(subtitles: list):
     for sub in subtitles:
         values.append([
             stylish(str(i), foreground=SECONDARY_COLOR),
-            sub["SubFileName"],
-            sub["InfoFormat"],
-            "" if sub['MovieKind'] == "movie" else f"S{int(sub['SeriesSeason']):02}E{int(sub['SeriesEpisode']):02}",
-            yes if sub["SubHearingImpaired"] == "1" else no,
-            yes if sub["SubAutoTranslation"] == "1" else no,
-            sub["LanguageName"],
-            sub["SubRating"],
-            sub["SubDownloadsCnt"],
+            sub.SubFileName,
+            sub.InfoFormat,
+            "" if sub.MovieKind == "movie" else f"S{int(sub.SeriesSeason):02}E{int(sub.SeriesEpisode):02}",
+            yes if sub.SubHearingImpaired == "1" else no,
+            yes if sub.SubAutoTranslation == "1" else no,
+            sub.LanguageName,
+            sub.SubRating,
+            sub.SubDownloadsCnt,
         ])
         i += 1
     print(table(
@@ -161,31 +162,31 @@ def download_subtitle(video: Episode | Movie, lang: OSLanguage) -> str | None:
         raise Exception("Failed to get imdb id")
 
     if isinstance(video, Episode):
-        status, subtitles = opensubtitles.search(
+        res = opensubtitles.search(
             imdb_id=imdb_id,
             season=video.seasonNumber,
             episode=video.episodeNumber,
             language=lang
         )
     else:
-        status, subtitles = opensubtitles.search(
+        res = opensubtitles.search(
             imdb_id=imdb_id,
             language=lang
         )
 
-    if status not in range(200, 300):
-        raise Exception(f"Failed to search for subtitles ({status})")
+    if res.status_code not in range(200, 300):
+        raise Exception(f"Failed to search for subtitles ({res.status_code})")
 
-    if len(subtitles) == 0:
+    if len(res.subtitles) == 0:
         raise NoSubtitleResultsException()
 
-    subtitle = select_subtitle(subtitles)
+    subtitle = select_subtitle(res.subtitles)
     if subtitle is None:
         return None
 
     video_path = video.media[0].parts[0].file
-    subtitle_path = get_subtitle_download_path(video_path, subtitle["ISO639"], subtitle["SubFormat"])
+    subtitle_path = get_subtitle_download_path(video_path, subtitle.ISO639, subtitle.SubFormat)
 
-    download_extract(subtitle["SubDownloadLink"], subtitle_path)
+    subtitle.download_extract(subtitle_path)
 
     return subtitle_path

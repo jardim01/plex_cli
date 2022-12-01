@@ -10,7 +10,7 @@ from stages.Stage import Stage
 from stages.SeasonStage import SeasonStage
 from Command import Command
 from AppState import AppState
-from config import ERROR_COLOR, SUBTITLE_LOOKBACK, REQUIRED_SUBTITLE_LANGS, SECONDARY_COLOR
+from config import ERROR_COLOR, EPISODE_SUBTITLE_LOOKBACK, REQUIRED_SUBTITLE_LANGS, SECONDARY_COLOR
 from subtitles import get_missing_subtitle_langs_2, display_missing_subtitles_2, download_missing_subtitles
 from utils import list_items, display_props, confirm
 
@@ -64,7 +64,7 @@ def _missing_subtitles(match: Match, state: AppState):
 
     filters = {"show.id": state.show.ratingKey}
     if not all_episodes:
-        filters["originallyAvailableAt>>"] = SUBTITLE_LOOKBACK
+        filters["originallyAvailableAt>>"] = EPISODE_SUBTITLE_LOOKBACK
 
     episodes: list[Episode] = state.shows_section.searchEpisodes(filters=filters)
     missing = get_missing_subtitle_langs_2(episodes, REQUIRED_SUBTITLE_LANGS.keys())

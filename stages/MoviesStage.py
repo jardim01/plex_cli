@@ -10,7 +10,7 @@ from stages.Stage import Stage
 from stages.MovieStage import MovieStage
 from Command import Command
 from AppState import AppState
-from config import ERROR_COLOR, SUBTITLE_LOOKBACK, REQUIRED_SUBTITLE_LANGS, SECONDARY_COLOR
+from config import ERROR_COLOR, MOVIE_SUBTITLE_LOOKBACK, REQUIRED_SUBTITLE_LANGS, SECONDARY_COLOR
 from subtitles import display_missing_subtitles_2, get_missing_subtitle_langs_2, download_missing_subtitles
 from utils import get_at_index_or_none, list_items, confirm
 
@@ -67,7 +67,7 @@ def _missing_subtitles(match: Match, state: AppState):
 
     filters = {}
     if not all_movies:
-        filters["originallyAvailableAt>>"] = SUBTITLE_LOOKBACK
+        filters["originallyAvailableAt>>"] = MOVIE_SUBTITLE_LOOKBACK
 
     movies: list[Movie] = state.movies_section.searchMovies(filters=filters)
     missing = get_missing_subtitle_langs_2(movies, REQUIRED_SUBTITLE_LANGS.keys())
