@@ -10,9 +10,11 @@ from stages.Stage import Stage
 from stages.MovieStage import MovieStage
 from Command import Command
 from AppState import AppState
-from config import ERROR_COLOR, MOVIE_SUBTITLE_LOOKBACK, REQUIRED_SUBTITLE_LANGS, SECONDARY_COLOR
+from config import ERROR_COLOR, MOVIE_SUBTITLE_LOOKBACK, MOVIE_THUMBNAIL_LOOKBACK, REQUIRED_SUBTITLE_LANGS, \
+    SECONDARY_COLOR
 from subtitles import display_missing_subtitles_2, get_missing_subtitle_langs_2, download_missing_subtitles
 from utils import get_at_index_or_none, list_items, confirm
+from video_preview_thumbnails import display_missing_video_preview_thumbnails
 
 movieStage = MovieStage()
 
@@ -21,20 +23,23 @@ class MoviesStage(Stage):
     def __init__(self):
         super().__init__()
         self.commands = [
-            Command(re.compile(r"list|all|movies"),
-                    "Displays the list of movies",
+            Command(re.compile(r'list|all|movies'),
+                    'Displays the list of movies',
                     _list_movies),
-            Command(re.compile(r"\? (.+)"),
-                    "Displays the list of movies that match the given input",
+            Command(re.compile(r'\? (.+)'),
+                    'Displays the list of movies that match the given input',
                     _list_movies),
-            Command(re.compile(r"(\d+)"),
-                    "Navigates to a specific movie",
+            Command(re.compile(r'(\d+)'),
+                    'Navigates to a specific movie',
                     _enter_movie_stage_by_idx),
-            Command(re.compile(r"ms( -a)?( -d)?"),
-                    "Displays/downloads missing subtitles",
+            Command(re.compile(r'ms( -a)?( -d)?'),
+                    'Displays/downloads missing subtitles',
                     _missing_subtitles),
-            Command(re.compile(r"scan|update"),
-                    "Scans the movies section for new media",
+            Command(re.compile(r'mvpt( -a)?( -g)?'),
+                    'Displays/generates missing video preview thumbnails',
+                    _missing_video_preview_thumbnails),
+            Command(re.compile(r'scan|update'),
+                    'Scans the movies section for new media',
                     _scan_library_files)
         ]
 
@@ -54,7 +59,7 @@ def _enter_movie_stage_by_idx(match: Match, state: AppState):
         movie = movies[idx]
         _enter_movie_stage(movie, state)
     else:
-        stylish_p("Invalid index", foreground=ERROR_COLOR)
+        stylish_p('Invalid index', foreground=ERROR_COLOR)
 
 
 def _enter_movie_stage(movie: Movie, state: AppState):
@@ -67,7 +72,7 @@ def _missing_subtitles(match: Match, state: AppState):
 
     filters = {}
     if not all_movies:
-        filters["originallyAvailableAt>>"] = MOVIE_SUBTITLE_LOOKBACK
+        filters['originallyAvailableAt>>'] = MOVIE_SUBTITLE_LOOKBACK
 
     movies: list[Movie] = state.movies_section.searchMovies(filters=filters)
     missing = get_missing_subtitle_langs_2(movies, REQUIRED_SUBTITLE_LANGS.keys())
@@ -78,7 +83,24 @@ def _missing_subtitles(match: Match, state: AppState):
         display_missing_subtitles_2(missing)
 
 
+def _missing_video_preview_thumbnails(match: Match, state: AppState):
+    all_movies = match.groups()[0] is not None
+    generate = match.groups()[1] is not None
+
+    filters = {}
+    if not all_movies:
+        filters['originallyAvailableAt>>'] = MOVIE_THUMBNAIL_LOOKBACK
+
+    movies: list[Movie] = state.movies_section.searchMovies(filters=filters)
+    missing = [e for e in movies if not e.hasPreviewThumbnails]
+
+    for m in missing:
+        display_missing_video_preview_thumbnails(m)
+        if generate:
+            m.analyze()
+
+
 def _scan_library_files(_: Match, state: AppState):
-    if confirm("You are about to scan the movies section"):
-        stylish_p("Scaning movies section...", foreground=SECONDARY_COLOR, style=Style.LIGHT)
+    if confirm('You are about to scan the movies section'):
+        stylish_p('Scaning movies section...', foreground=SECONDARY_COLOR, style=Style.LIGHT)
         state.movies_section.update()

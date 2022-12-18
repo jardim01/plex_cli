@@ -1,11 +1,11 @@
 import subprocess
 
-SUBTITLE_CLEANER = "cmd /c D:\\Projects\\Electron\\SubtitleCleaner\\run.vbs"
+SUBTITLE_CLEANER = 'cmd /c D:\\Projects\\Electron\\SubtitleCleaner\\run.vbs'
 
 
 def open_subtitle_cleaner(args):
     args = [f'"{arg}"' for arg in args]
-    subprocess.call(f"{SUBTITLE_CLEANER} {' '.join(args)}")
+    subprocess.call(f'{SUBTITLE_CLEANER} {" ".join(args)}')
 
 
 def convert_to_utf8(file):

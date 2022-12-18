@@ -23,8 +23,8 @@ class MainStage(Stage):
     def __init__(self):
         super().__init__()
         self.commands = [
-            Command(re.compile(r"tv|shows"), "Navigates to tv shows stage", _enter_shows_stage),
-            Command(re.compile(r"movies"), "Navigates to movies stage", _enter_movies_stage)
+            Command(re.compile(r'tv|shows'), 'Navigates to tv shows stage', _enter_shows_stage),
+            Command(re.compile(r'movies'), 'Navigates to movies stage', _enter_movies_stage)
         ]
 
 
@@ -39,10 +39,10 @@ def _enter_shows_stage(_: Match, state: AppState) -> None:
     try:
         section = _get_shows_section(state.server)
     except SectionNotFoundException:
-        stylish_p("Failed to find tv show section", foreground=ERROR_COLOR)
+        stylish_p('Failed to find tv show section', foreground=ERROR_COLOR)
         return
 
-    showsStage.run_loop(state=state.copy(path=state.path + ["TV Shows"], shows_section=section))
+    showsStage.run_loop(state=state.copy(path=state.path + ['TV Shows'], shows_section=section))
 
 
 def _get_movies_section(server: PlexServer) -> MovieSection:
@@ -56,7 +56,7 @@ def _enter_movies_stage(_: Match, state: AppState) -> None:
     try:
         section = _get_movies_section(state.server)
     except SectionNotFoundException:
-        stylish_p("Failed to find movies section", foreground=ERROR_COLOR)
+        stylish_p('Failed to find movies section', foreground=ERROR_COLOR)
         return
 
-    moviesStage.run_loop(state=state.copy(path=state.path + ["Movies"], movies_section=section))
+    moviesStage.run_loop(state=state.copy(path=state.path + ['Movies'], movies_section=section))

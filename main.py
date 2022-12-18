@@ -18,7 +18,7 @@ def main():
         account: MyPlexAccount = MyPlexAccount(token=PLEX_TOKEN)
         server: PlexServer = account.resource(name=PLEX_SERVER_NAME).connect(ssl=True, locations=['remote'])
     except Exception as e:
-        msg = "Failed to login to Plex" if isinstance(e, BadRequest) else str(e)
+        msg = 'Failed to login to Plex' if isinstance(e, BadRequest) else str(e)
         stylish_p(msg, foreground=ERROR_COLOR)
         sys.exit(EXIT_FAILURE)
 

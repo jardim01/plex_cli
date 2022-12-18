@@ -10,9 +10,11 @@ from stages.Stage import Stage
 from stages.EpisodeStage import EpisodeStage
 from Command import Command
 from AppState import AppState
-from config import SECONDARY_COLOR, EPISODE_SUBTITLE_LOOKBACK, REQUIRED_SUBTITLE_LANGS, ERROR_COLOR
+from config import EPISODE_THUMBNAIL_LOOKBACK, SECONDARY_COLOR, EPISODE_SUBTITLE_LOOKBACK, REQUIRED_SUBTITLE_LANGS, \
+    ERROR_COLOR
 from subtitles import get_missing_subtitle_langs_2, display_missing_subtitles_2, download_missing_subtitles
 from utils import confirm, display_props, get_at_index_or_none, list_items
+from video_preview_thumbnails import display_missing_video_preview_thumbnails
 
 episodeStage = EpisodeStage()
 
@@ -21,20 +23,23 @@ class SeasonStage(Stage):
     def __init__(self):
         super().__init__()
         self.commands = [
-            Command(re.compile(r"list|all|episodes"),
-                    "Displays the list of episodes",
+            Command(re.compile(r'list|all|episodes'),
+                    'Displays the list of episodes',
                     _list_episodes),
-            Command(re.compile(r"(\d+)"),
-                    "Navigates to a specific episode",
+            Command(re.compile(r'(\d+)'),
+                    'Navigates to a specific episode',
                     _enter_episode_stage_by_idx),
-            Command(re.compile(r"ms( -a)?( -d)?"),
-                    "Displays/downloads missing subtitles",
+            Command(re.compile(r'ms( -a)?( -d)?'),
+                    'Displays/downloads missing subtitles',
                     _missing_subtitles),
-            Command(re.compile(r"info|details"),
-                    "Displays season info",
+            Command(re.compile(r'mvpt( -a)?( -g)?'),
+                    'Displays/generates missing video preview thumbnails',
+                    _missing_video_preview_thumbnails),
+            Command(re.compile(r'info|details'),
+                    'Displays season info',
                     _display_info),
-            Command(re.compile(r"refresh"),
-                    "Refreshes season metadata",
+            Command(re.compile(r'refresh'),
+                    'Refreshes season metadata',
                     _refresh_metadata),
         ]
 
@@ -54,20 +59,20 @@ def _enter_episode_stage_by_idx(match: Match, state: AppState):
         episode = episodes[idx]
         _enter_episode_stage(episode, state)
     else:
-        stylish_p("Invalid index", foreground=ERROR_COLOR)
+        stylish_p('Invalid index', foreground=ERROR_COLOR)
 
 
 def _enter_episode_stage(episode: Episode, state: AppState):
-    episodeStage.run_loop(state.copy(path=state.path + [f"Episode {episode.episodeNumber}"], episode=episode))
+    episodeStage.run_loop(state.copy(path=state.path + [f'Episode {episode.episodeNumber}'], episode=episode))
 
 
 def _missing_subtitles(match: Match, state: AppState):
     all_episodes = match.groups()[0] is not None
     download = match.groups()[1] is not None
 
-    filters = {"season.id": state.season.ratingKey}
+    filters = {'season.id': state.season.ratingKey}
     if not all_episodes:
-        filters["originallyAvailableAt>>"] = EPISODE_SUBTITLE_LOOKBACK
+        filters['originallyAvailableAt>>'] = EPISODE_SUBTITLE_LOOKBACK
 
     episodes: list[Episode] = state.shows_section.searchEpisodes(filters=filters)
     missing = get_missing_subtitle_langs_2(episodes, REQUIRED_SUBTITLE_LANGS.keys())
@@ -78,13 +83,30 @@ def _missing_subtitles(match: Match, state: AppState):
         display_missing_subtitles_2(missing)
 
 
+def _missing_video_preview_thumbnails(match: Match, state: AppState):
+    all_episodes = match.groups()[0] is not None
+    generate = match.groups()[1] is not None
+
+    filters = {'season.id': state.season.ratingKey}
+    if not all_episodes:
+        filters['originallyAvailableAt>>'] = EPISODE_THUMBNAIL_LOOKBACK
+
+    episodes: list[Episode] = state.shows_section.searchEpisodes(filters=filters)
+    missing = [e for e in episodes if not e.hasPreviewThumbnails]
+
+    for e in missing:
+        display_missing_video_preview_thumbnails(e)
+        if generate:
+            e.analyze()
+
+
 def _display_info(_: Match, state: AppState):
-    display_props(state.season, lambda key, value: not key.startswith("_") and value is not None)
+    display_props(state.season, lambda key, value: not key.startswith('_') and value is not None)
 
 
 def _refresh_metadata(_: Match, state: AppState):
-    msg = "You are about to refresh metadata for "
-    msg += stylish(f"{state.season.parentTitle} - {state.season.title}", style=Style.BOLD)
+    msg = 'You are about to refresh metadata for '
+    msg += stylish(f'{state.season.parentTitle} - {state.season.title}', style=Style.BOLD)
     if confirm(msg):
-        stylish_p("Refreshing metadata...", foreground=SECONDARY_COLOR, style=Style.LIGHT)
+        stylish_p('Refreshing metadata...', foreground=SECONDARY_COLOR, style=Style.LIGHT)
         state.season.refresh()

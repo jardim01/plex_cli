@@ -16,7 +16,7 @@ class Stage:
 
     def _all_commands(self) -> list[Command]:
         return [
-            Command(re.compile(r"help"), "Displays this message", self._help_handler),
+            Command(re.compile(r'help'), 'Displays this message', self._help_handler),
             *self.commands
         ]
 
@@ -28,10 +28,10 @@ class Stage:
         pattern_style = Style.BOLD
         for c in self._all_commands():
             s = stylish(c.pattern.pattern, foreground=SECONDARY_COLOR, style=pattern_style)
-            s += f" - {c.description}"
+            s += f' - {c.description}'
             print(s)
         s = stylish(GO_BACK, foreground=SECONDARY_COLOR, style=pattern_style)
-        s += f" - Navigates to previous stage"
+        s += f' - Navigates to previous stage'
         print(s)
 
     def run_loop(self, state: AppState) -> None:

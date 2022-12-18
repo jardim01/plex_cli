@@ -34,21 +34,21 @@ def get_missing_subtitle_langs_2(
 
 def get_searching_string(video: Episode | Movie, os_lang: OSLanguage):
     s = stylish(
-        f"Searching for subtitles for ",
+        f'Searching for subtitles for ',
         foreground=SECONDARY_COLOR,
         style=Style.LIGHT
     )
     if isinstance(video, Episode):
-        tmp = f"{video.grandparentTitle} {video.seasonEpisode.upper()}"
+        tmp = f'{video.grandparentTitle} {video.seasonEpisode.upper()}'
     else:
-        tmp = f"{video.title}"
+        tmp = f'{video.title}'
     s += stylish(
         tmp,
         foreground=SECONDARY_COLOR,
         style=Style.BOLD
     )
     s += stylish(
-        f" ({os_lang.value}) (aired {humanize.naturaltime(video.originallyAvailableAt)})...",
+        f' ({os_lang.value}) (aired {humanize.naturaltime(video.originallyAvailableAt)})...',
         foreground=SECONDARY_COLOR,
         style=Style.LIGHT
     )
@@ -61,15 +61,15 @@ def download_subtitle_with_output(video: Episode | Movie, os_lang: OSLanguage):
         print(s)
         subtitle_path = download_subtitle(video, os_lang)
         if subtitle_path is not None:
-            stylish_p(f"Subtitle downloaded to {subtitle_path}", foreground=SUCCESS_COLOR)
+            stylish_p(f'Subtitle downloaded to {subtitle_path}', foreground=SUCCESS_COLOR)
 
         return subtitle_path
     except NoSubtitleResultsException:
         fallback = SUBTITLE_LANGS_FALLBACK.get(os_lang)
         if fallback is None:
-            stylish_p(f"No subtitles found ({os_lang.value})", foreground=WARNING_COLOR)
+            stylish_p(f'No subtitles found ({os_lang.value})', foreground=WARNING_COLOR)
         else:
-            stylish_p(f"No subtitles found ({os_lang.value}), using fallback ({fallback.value})",
+            stylish_p(f'No subtitles found ({os_lang.value}), using fallback ({fallback.value})',
                       foreground=WARNING_COLOR)
             return download_subtitle_with_output(video, fallback)
     except Exception as e:
@@ -98,19 +98,19 @@ def download_missing_subtitles(missing: dict[Episode | Movie, list[str]]):
 
 def display_missing_subtitles(video: Episode | Movie, langs: list[str]):
     if isinstance(video, Episode):
-        tmp = f"{video.grandparentTitle} {video.seasonEpisode.upper()}"
+        tmp = f'{video.grandparentTitle} {video.seasonEpisode.upper()}'
     else:
-        tmp = f"{video.title}"
+        tmp = f'{video.title}'
     s = stylish(tmp,
                 foreground=SECONDARY_COLOR,
                 style=Style.BOLD)
-    s += stylish(f" (aired {humanize.naturaltime(video.originallyAvailableAt)})",
+    s += stylish(f' (aired {humanize.naturaltime(video.originallyAvailableAt)})',
                  foreground=SECONDARY_COLOR,
                  style=Style.LIGHT)
-    s += stylish(": ",
+    s += stylish(': ',
                  foreground=SECONDARY_COLOR,
                  style=Style.BOLD)
-    s += ", ".join(langs)
+    s += ', '.join(langs)
     print(s)
 
 
@@ -120,9 +120,9 @@ def display_missing_subtitles_2(missing: dict[Episode | Movie, list[str]]):
 
 
 def select_subtitle(subtitles: list[Subtitle]) -> Subtitle | None:
-    headers = ["#", "File Name", "Format", "Episode", "HI", "AI", "Language", "Rating", "Downloads"]
-    yes = stylish("✓", foreground=Color.GREEN)
-    no = stylish("✗", foreground=Color.RED)
+    headers = ['#', 'File Name', 'Format', 'Episode', 'HI', 'AI', 'Language', 'Rating', 'Downloads']
+    yes = stylish('✓', foreground=Color.GREEN)
+    no = stylish('✗', foreground=Color.RED)
     values = []
     i = 1
     for sub in subtitles:
@@ -130,9 +130,9 @@ def select_subtitle(subtitles: list[Subtitle]) -> Subtitle | None:
             stylish(str(i), foreground=SECONDARY_COLOR),
             sub.SubFileName,
             sub.InfoFormat,
-            "" if sub.MovieKind == "movie" else f"S{int(sub.SeriesSeason):02}E{int(sub.SeriesEpisode):02}",
-            yes if sub.SubHearingImpaired == "1" else no,
-            yes if sub.SubAutoTranslation == "1" else no,
+            '' if sub.MovieKind == 'movie' else f'S{int(sub.SeriesSeason):02}E{int(sub.SeriesEpisode):02}',
+            yes if sub.SubHearingImpaired == '1' else no,
+            yes if sub.SubAutoTranslation == '1' else no,
             sub.LanguageName,
             sub.SubRating,
             sub.SubDownloadsCnt,
@@ -144,7 +144,7 @@ def select_subtitle(subtitles: list[Subtitle]) -> Subtitle | None:
         table_chars=TableChars.default().transformed(table_chars_transformation))
     )
 
-    user_input = stylish_input(get_prompt("Choose subtitle"))
+    user_input = stylish_input(get_prompt('Choose subtitle'))
     if user_input.isdigit():
         idx = int(user_input) - 1
         return subtitles[idx]
@@ -159,7 +159,7 @@ def download_subtitle(video: Episode | Movie, lang: OSLanguage) -> str | None:
         imdb_id = get_imdb_id(video)
 
     if imdb_id is None:
-        raise Exception("Failed to get imdb id")
+        raise Exception('Failed to get imdb id')
 
     if isinstance(video, Episode):
         res = opensubtitles.search(
@@ -175,7 +175,7 @@ def download_subtitle(video: Episode | Movie, lang: OSLanguage) -> str | None:
         )
 
     if res.status_code not in range(200, 300):
-        raise Exception(f"Failed to search for subtitles ({res.status_code})")
+        raise Exception(f'Failed to search for subtitles ({res.status_code})')
 
     if len(res.subtitles) == 0:
         raise NoSubtitleResultsException()

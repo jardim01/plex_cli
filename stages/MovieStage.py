@@ -16,14 +16,14 @@ class MovieStage(Stage):
     def __init__(self):
         super().__init__()
         self.commands = [
-            Command(re.compile(r"ms( -d)?"),
-                    "Displays/downloads missing subtitles",
+            Command(re.compile(r'ms( -d)?'),
+                    'Displays/downloads missing subtitles',
                     _missing_subtitles),
-            Command(re.compile(r"info|details"),
-                    "Displays movie info",
+            Command(re.compile(r'info|details'),
+                    'Displays movie info',
                     _display_info),
-            Command(re.compile(r"refresh"),
-                    "Refreshes movie metadata",
+            Command(re.compile(r'refresh'),
+                    'Refreshes movie metadata',
                     _refresh_metadata),
         ]
 
@@ -42,12 +42,12 @@ def _missing_subtitles(match: Match, state: AppState):
 
 
 def _display_info(_: Match, state: AppState):
-    display_props(state.movie, lambda key, value: not key.startswith("_") and value is not None)
+    display_props(state.movie, lambda key, value: not key.startswith('_') and value is not None)
 
 
 def _refresh_metadata(_: Match, state: AppState):
-    msg = "You are about to refresh metadata for "
-    msg += stylish(f"{state.movie.title}", style=Style.BOLD)
+    msg = 'You are about to refresh metadata for '
+    msg += stylish(f'{state.movie.title}', style=Style.BOLD)
     if confirm(msg):
-        stylish_p("Refreshing metadata...", foreground=SECONDARY_COLOR, style=Style.LIGHT)
+        stylish_p('Refreshing metadata...', foreground=SECONDARY_COLOR, style=Style.LIGHT)
         state.episode.refresh()
